@@ -10,8 +10,8 @@
 // @author       Tune
 // @homepage     https://github.com/tunecc/NodeSeek-User-Profiler
 // @source       https://github.com/tunecc/NodeSeek-User-Profiler
-// @downloadURL  https://raw.githubusercontent.com/tunecc/NodeSeek-User-Profiler/refs/heads/main/NS_UP.js
-// @downloadURL  https://raw.githubusercontent.com/tunecc/NodeSeek-User-Profiler/refs/heads/main/NS_UP.js
+// @downloadURL https://update.greasyfork.org/scripts/559093/NodeSeek%20%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E7%94%9F%E6%88%90%E5%99%A8.user.js
+// @updateURL https://update.greasyfork.org/scripts/559093/NodeSeek%20%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E7%94%9F%E6%88%90%E5%99%A8.meta.js
 // @license      MIT
 // @match        https://www.nodeseek.com/space/*
 // @match        https://nodeseek.com/space/*
