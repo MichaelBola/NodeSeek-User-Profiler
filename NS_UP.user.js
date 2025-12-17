@@ -3,7 +3,7 @@
 // @name:zh-CN   NodeSeek 用户画像生成器
 // @name:en      NodeSeek User Profiler
 // @namespace    https://github.com/tunecc/NodeSeek-User-Profiler
-// @version      3.3
+// @version      3.4
 // @description  自动爬取NodeSeek用户的评论导出Markdown/CSV、生成符合 NodeSeek 生态的 AI 分析指令。
 // @description:en  Automatically crawl NodeSeek users' comments, export them as Markdown/CSV, and generate AI analysis commands that comply with the NodeSeek ecosystem.
 // @author       Tune
@@ -25,16 +25,18 @@
 
     // --- 配置区域 ---
     const CONFIG = {
-        CONCURRENCY: 3,       // 并发线程数
-        API_DELAY: 150,       // 🚀 API模式请求间隔 (ms)
-        DEEP_DELAY: 2000,      // 🛡️ 深挖模式请求间隔 (ms)
+        API_CONCURRENCY: 3,   // 🚀 API阶段并发数 (保持高速)
+        DEEP_CONCURRENCY: 1,  // 🛡️ 深挖阶段并发数 (强制单线程，最安全)
+        API_DELAY: 100,       // API 请求间隔 (ms)
+        DEEP_DELAY: 100,      // 深挖 请求间隔 (ms)
+        COOLING_DELAY: 5200,  // 🧊 触发限速后的冷却时间
         PER_PAGE_FLOOR: 10    // 硬编码：每页10楼
     };
 
     // 状态管理
     let state = {
         isRunning: false,
-        phase: 1,             // 🟢 新增阶段标记: 1=API, 2=深挖
+        phase: 1,             // 1=API, 2=深挖
         processedPages: 0,
         maxPage: 10,
         totalItems: 0,
@@ -228,7 +230,7 @@
         document.getElementById('ns-clear').onclick = clearData;
         
         document.getElementById('ns-help-tip').onclick = () => {
-            showToast(`💡 深挖模式说明\n\n1. 自动获取被截断的长回复完整内容\n2. 深挖的速度是2s一次（有防爬机制）评论太多会很慢\n3. 如果深挖的间隔设置的低，能在F12控制台看到too many requests \n`, 6000);
+            showToast(`💡 深挖模式说明\n\n1. 自动获取被截断的长回复完整内容\n2. 默认急速模式 (150ms/次)，触发限速后自动冷却 (5.2s)\n3. 如果间隔设置的低，能在F12控制台看到too many requests \n`, 6000);
         };
 
         const realMax = detectTotalPages();
@@ -241,7 +243,6 @@
     // --- 4. 核心提取逻辑 ---
 
     function detectTotalPages() {
-        // V3.2 经典识别逻辑
         const pagination = document.querySelector('div[role="navigation"][aria-label="pagination"]');
         if (!pagination) return 1;
         let max = 1;
@@ -268,6 +269,7 @@
         state.maxPage = inputPages;
         state.deepMode = isDeep;
         state.deepProgress = 0;
+        state.deepTotal = 0; 
         state.currentPostId = 0;
         state.currentPage = 0;
         allReplies = [];
@@ -288,15 +290,26 @@
                     const json = await res.json();
                     
                     if (json && json.comments && json.comments.length > 0) {
-                        const newItems = json.comments.map(item => ({
-                            page: page,
-                            post_id: item.post_id,
-                            floor_id: item.floor_id,
-                            title: item.title || "无标题",
-                            content: item.text || "无内容", 
-                            isFull: false, 
-                            url: `https://www.nodeseek.com/post-${item.post_id}-1#${item.floor_id}`
-                        }));
+                        const newItems = json.comments.map(item => {
+                            let text = item.text || "无内容";
+                            
+                            // 🟢 严格智能判断：仅匹配 " ..." (空格+三个点)
+                            const isTruncated = text.endsWith(" ...");
+                            
+                            // 如果开启深挖模式，且内容被截断，则 isFull=false (需要挖)
+                            // 否则 isFull=true (不需要挖，直接用)
+                            const needDig = state.deepMode && isTruncated;
+
+                            return {
+                                page: page,
+                                post_id: item.post_id,
+                                floor_id: item.floor_id,
+                                title: item.title || "无标题",
+                                content: text, 
+                                isFull: !needDig, // 取反：不需要挖 = 它是完整的
+                                url: `https://www.nodeseek.com/post-${item.post_id}-1#${item.floor_id}`
+                            };
+                        });
                         
                         newItems.forEach(item => {
                             allReplies.push(item);
@@ -321,7 +334,7 @@
         };
 
         const threads = [];
-        for (let i = 0; i < CONFIG.CONCURRENCY; i++) threads.push(apiWorker());
+        for (let i = 0; i < CONFIG.API_CONCURRENCY; i++) threads.push(apiWorker());
         await Promise.all(threads);
 
         if (state.isRunning && allReplies.length > 0 && state.deepMode) {
@@ -333,22 +346,26 @@
 
     async function startDeepScanning() {
         state.phase = 2; // 🟢 2: 深挖阶段
-        const deepTasks = [...allReplies]; 
-        state.totalItems = deepTasks.length; 
         
-        updateUI(); // 🟢 立即刷新 UI 状态
-        updateStatus(`🔍 正在深挖 ${state.totalItems} 条完整内容...`);
+        // 🟢 过滤出真正需要深挖的任务
+        const deepTasks = allReplies.filter(item => !item.isFull);
+        state.deepTotal = deepTasks.length; 
+        state.deepProgress = 0;
+        
+        if (state.deepTotal === 0) {
+            updateStatus("✨ 没有需要深挖的内容，跳过...");
+            await sleep(500);
+            finish();
+            return;
+        }
+
+        updateUI(); 
+        updateStatus(`🔍 智能深挖：${state.deepTotal} 条截断内容...`);
         
         const deepWorker = async () => {
             while (deepTasks.length > 0 && state.isRunning) {
                 const item = deepTasks.shift();
                 
-                if (item.isFull) {
-                    state.deepProgress++;
-                    updateUI();
-                    continue; 
-                }
-
                 try {
                     let targetPage = Math.ceil(item.floor_id / CONFIG.PER_PAGE_FLOOR);
                     if (targetPage < 1) targetPage = 1;
@@ -357,41 +374,53 @@
                     state.currentPage = targetPage;
                     updateUI(); 
                     
-                    updateStatus(`📥 正在扫描: 帖子${item.post_id} 第${targetPage}页`);
+                    updateStatus(`📥 正在深挖: 帖子${item.post_id} (剩${deepTasks.length})`);
                     
                     const res = await fetch(`/post-${item.post_id}-${targetPage}`);
-                    const text = await res.text();
-                    const doc = new DOMParser().parseFromString(text, 'text/html');
                     
-                    const floorLinks = doc.querySelectorAll('.floor-link');
-                    
-                    floorLinks.forEach(link => {
-                        const currentFloorId = parseInt(link.innerText.replace('#', ''));
-                        const mapKey = `${item.post_id}-${currentFloorId}`;
-                        const targetItem = replyMap.get(mapKey);
+                    // 🚨 防封关键逻辑：检测 403/429
+                    if (res.status === 429 || res.status === 403) {
+                        updateStatus(`🚨 触发限速 (${res.status})，冷却 ${CONFIG.COOLING_DELAY}ms...`);
+                        await sleep(CONFIG.COOLING_DELAY);
+                        deepTasks.unshift(item); // 失败重试
+                        continue;
+                    }
+
+                    if (res.status === 200) {
+                        const text = await res.text();
+                        const doc = new DOMParser().parseFromString(text, 'text/html');
                         
-                        if (targetItem && !targetItem.isFull) {
-                            const container = link.closest('.content-item') || link.closest('.post-item') || link.closest('li');
-                            if (container) {
-                                const contentEl = container.querySelector('.post-content');
-                                if (contentEl) {
-                                    const cleanEl = contentEl.cloneNode(true);
-                                    const quotes = cleanEl.querySelectorAll('blockquote');
-                                    quotes.forEach(q => {
-                                        const qt = q.innerText.replace(/\n/g, ' ').trim();
-                                        const mark = document.createTextNode(` (引用上下文: ${qt}) `);
-                                        q.parentNode.replaceChild(mark, q);
-                                    });
-                                    
-                                    targetItem.content = cleanEl.innerText.trim();
-                                    targetItem.isFull = true;
+                        const floorLinks = doc.querySelectorAll('.floor-link');
+                        
+                        floorLinks.forEach(link => {
+                            const currentFloorId = parseInt(link.innerText.replace('#', ''));
+                            const mapKey = `${item.post_id}-${currentFloorId}`;
+                            const targetItem = replyMap.get(mapKey);
+                            
+                            // 只有那些被标记为不完整的目标才需要更新
+                            if (targetItem && !targetItem.isFull) {
+                                const container = link.closest('.content-item') || link.closest('.post-item') || link.closest('li');
+                                if (container) {
+                                    const contentEl = container.querySelector('.post-content');
+                                    if (contentEl) {
+                                        const cleanEl = contentEl.cloneNode(true);
+                                        const quotes = cleanEl.querySelectorAll('blockquote');
+                                        quotes.forEach(q => {
+                                            const qt = q.innerText.replace(/\n/g, ' ').trim();
+                                            const mark = document.createTextNode(` (引用上下文: ${qt}) `);
+                                            q.parentNode.replaceChild(mark, q);
+                                        });
+                                        
+                                        targetItem.content = cleanEl.innerText.trim();
+                                        targetItem.isFull = true;
+                                    }
                                 }
                             }
-                        }
-                    });
-                    
-                    state.deepProgress++;
-                    updateUI();
+                        });
+                        
+                        state.deepProgress++;
+                        updateUI();
+                    }
                     
                     await sleep(CONFIG.DEEP_DELAY);
                     
@@ -403,7 +432,7 @@
         };
         
         const dThreads = [];
-        for (let i = 0; i < CONFIG.CONCURRENCY; i++) dThreads.push(deepWorker());
+        for (let i = 0; i < CONFIG.DEEP_CONCURRENCY; i++) dThreads.push(deepWorker());
         await Promise.all(dThreads);
         
         finish();
@@ -440,15 +469,13 @@
             md += `> 1. 内容中被标记为 \`(引用上下文: ...)\` 的部分是被回复对象的原话，仅供参考语境，**不代表用户本人的观点**。\n`;
             md += `> 2. 所有回复均已通过爬虫抓取完整内容，无截断。\n\n`;
         } else {
-            // API模式的提示 (你需要找回的这段)
+            // API模式的提示
             md += `> **注意**：\n`;
             md += `> 部分长回复可能因为 NodeSeek API 列表限制而显示为**截断状态**（通常以 ... 结尾）。请严格基于现有的内容片段进行分析，**无需臆测缺失部分**。\n\n`;
         }
 
         md += `## 👤 分析对象\n- **用户ID**: ${uid}\n- **来源**: NodeSeek\n- **回复总数**: ${allReplies.length}\n- **数据提取时间**: ${date}\n\n`;
         md += `## 💬 完整回复记录\n\n`;
-
-        // ... (后面的代码保持不变)
 
         const groupedMap = new Map();
         allReplies.forEach(item => {
@@ -745,11 +772,11 @@
             // 🟢 如果当前是深挖阶段 (Phase 2)
             if (state.deepMode && state.phase === 2) {
                 // 显示为：深挖(P5) 20 / 100
-                elPage.innerText = `深挖(P${state.currentPage || '-'}) ${state.deepProgress} / ${state.totalItems}`;
+                elPage.innerText = `深挖(P${state.currentPage || '-'}) ${state.deepProgress} / ${state.deepTotal}`; // 🟢 修复显示：分母为实际需挖数
                 elPage.style.color = '#AF52DE'; // 紫色
                 
                 if (elBar) {
-                    const pct = Math.min(100, (state.deepProgress / state.totalItems) * 100);
+                    const pct = Math.min(100, (state.deepProgress / state.deepTotal) * 100); // 🟢 修复进度条
                     elBar.style.width = `${pct}%`;
                     elBar.style.background = 'linear-gradient(135deg, #AF52DE, #BF5AF2)'; 
                 }
